@@ -1,3 +1,5 @@
+// Standalone entrypoint (`tsx seed/seed.ts`) — unlike src/app.ts, nothing else here loads .env.
+import "dotenv/config";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
