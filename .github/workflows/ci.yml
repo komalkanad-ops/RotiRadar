@@ -53,15 +53,30 @@ jobs:
 
   backend:
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: rotiradar_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -uroot -proot"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
     defaults:
       run:
         working-directory: backend
     # `postinstall` runs `prisma generate && prisma migrate deploy && npm run build` — that's the
-    # Hostinger Node-deploy hook and needs a live DB, so `npm ci` is run with --ignore-scripts here
-    # and each step is invoked explicitly. A dummy DATABASE_URL satisfies schema validation; nothing
-    # in this job actually connects.
+    # Hostinger Node-deploy hook, so `npm ci` is run with --ignore-scripts here and each step is
+    # invoked explicitly against the throwaway `mysql` service above instead.
     env:
-      DATABASE_URL: mysql://ci:ci@127.0.0.1:3306/rotiradar_ci
+      DATABASE_URL: mysql://root:root@127.0.0.1:3306/rotiradar_ci
+      JWT_SECRET: ci-test-secret-not-for-production-but-long-enough
+      ADMIN_BOOTSTRAP_EMAIL: admin@rotiradar.in
+      ADMIN_BOOTSTRAP_PASSWORD: ci-test-admin-password
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -71,7 +86,9 @@ jobs:
           cache-dependency-path: backend/package-lock.json
       - run: npm ci --ignore-scripts
       - run: npx prisma generate
+      # Real integration test of the migration history itself — builds the whole schema from
+      # scratch against a fresh database, the same way a brand-new environment would.
+      - run: npx prisma migrate deploy
       - run: npx tsc --noEmit
       - run: npm run build
-      # TODO(phase-1): once prisma/migrations/ exists, add a real mysql service + `prisma migrate
-      # deploy` to test the migration history from scratch, and `npm test` once a module has tests.
+      - run: npm test

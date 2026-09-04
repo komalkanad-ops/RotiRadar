@@ -1,5 +1,8 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
+import { requireJwtSecret } from "../lib/jwtSecret.js";
+
+const JWT_SECRET = requireJwtSecret();
 
 // Token shapes:
 //   customer/cook: { sub: <id>, role: "CUSTOMER" | "COOK" }
@@ -23,7 +26,7 @@ function readToken(req: Request): AuthClaims | null {
   const header = req.header("Authorization");
   if (!header?.startsWith("Bearer ")) return null;
   try {
-    return jwt.verify(header.slice(7), process.env.JWT_SECRET ?? "") as AuthClaims;
+    return jwt.verify(header.slice(7), JWT_SECRET) as AuthClaims;
   } catch {
     return null;
   }
