@@ -10,6 +10,7 @@ import { prisma } from "./lib/prisma.js";
 import { errorHandler, installProcessCrashGuards } from "./middleware/errorHandler.js";
 import { servicesRouter } from "./modules/services/servicesRouter.js";
 import { authRouter } from "./modules/auth/authRouter.js";
+import { cooksRouter } from "./modules/cooks/cooksRouter.js";
 
 // Just the Express app — no listen(), no schedulers. Separated from server.ts so tests can import
 // and exercise it with Supertest without opening a socket.
@@ -57,7 +58,7 @@ app.use(rateLimit({ windowMs: 15 * 60 * 1000, limit: 300, standardHeaders: true,
 // Domain modules. One line each; add new ones here (see .claude/commands/new-api-module.md).
 app.use("/services", servicesRouter);
 app.use("/auth", authRouter);
-// app.use("/cooks", cooksRouter);
+app.use("/cooks", cooksRouter);
 // app.use("/bookings", bookingsRouter);
 // app.use("/chat", chatRouter);
 // app.use("/payments", paymentsRouter);
