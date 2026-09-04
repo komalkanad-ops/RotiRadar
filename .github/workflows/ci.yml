@@ -89,6 +89,10 @@ jobs:
       # Real integration test of the migration history itself — builds the whole schema from
       # scratch against a fresh database, the same way a brand-new environment would.
       - run: npx prisma migrate deploy
+      # Several tests (bookings' pricing calc especially) depend on the catalog/config rows a real
+      # environment always has via `npm run seed` — without this, Service/AppConfig are empty on
+      # this fresh DB and booking creation 400s ("service tier isn't available").
+      - run: npm run seed
       - run: npx tsc --noEmit
       - run: npm run build
       - run: npm test

@@ -49,8 +49,11 @@ app.get("/health/db", async (_req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
     res.json({ ok: true, db: "up", uptimeS: Math.round(process.uptime()) });
-  } catch {
-    res.status(503).json({ ok: false, db: "down" });
+  } catch (err) {
+    // `code`/`name` only — never the error's own `message`, which for a Prisma connection error
+    // can echo back the connection string (i.e. the DB password) verbatim.
+    const e = err as { code?: string; name?: string };
+    res.status(503).json({ ok: false, db: "down", code: e.code, name: e.name });
   }
 });
 
