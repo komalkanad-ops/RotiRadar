@@ -1,0 +1,17 @@
+# gitleaks config. Extends the built-in ruleset; only adds allowlisting for paths that are
+# safe by design in this repo. Run locally with `gitleaks dir .` or `gitleaks git`.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Paths and values that are safe by design in this repo"
+paths = [
+  # Lockfiles — npm integrity hashes, not secrets.
+  '''.*package-lock\.json''',
+  # .env.example files ship placeholder values only.
+  '''.*\.env\.example''',
+  # Gitignored — listed so a local `gitleaks dir` run (which ignores .gitignore) matches CI.
+  '''secrets/.*''',
+  '''.*/build/.*''',
+  '''node_modules/.*''',
+]

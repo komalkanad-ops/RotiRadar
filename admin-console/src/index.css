@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-atta text-char font-sans antialiased;
+}
+
+h1,
+h2,
+h3 {
+  @apply font-display font-semibold;
+}

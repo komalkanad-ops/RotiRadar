@@ -1,0 +1,436 @@
+// RotiRadar data model — DRAFT. Not yet migrated against a real database.
+// Phase 1 generates the first migration: `npx prisma migrate dev --name init` against a local DB.
+// Money is stored as integer paise. Times are DateTime (UTC in the DB; slots are reasoned about in IST).
+// See docs/architecture.md for the entity overview.
+
+generator client {
+  provider = "prisma-client-js"
+  // No engineType override — the default (library) engine only. The binary engine spawns a
+  // subprocess per client and fails with EAGAIN on Hostinger's low process ulimit (CLAUDE.md #3).
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ──────────────────────────────────────────────────────────────────────
+
+enum ServiceTier {
+  BASIC
+  SABJI
+  FULL_MEAL
+}
+
+enum BookingStatus {
+  PENDING
+  ACCEPTED
+  ON_THE_WAY
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum CancelledBy {
+  CUSTOMER
+  COOK
+  ADMIN
+  SYSTEM
+}
+
+enum CookStatus {
+  PENDING_REVIEW
+  ACTIVE
+  SUSPENDED
+  REJECTED
+}
+
+enum DocumentType {
+  AADHAAR
+  PAN
+  POLICE_VERIFICATION
+  PHOTO
+}
+
+enum DocumentStatus {
+  UPLOADED
+  VERIFIED
+  REJECTED
+}
+
+enum TransactionStatus {
+  CREATED
+  PAID
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+}
+
+enum PayoutStatus {
+  PENDING
+  PROCESSING
+  PAID
+  FAILED
+}
+
+enum DisputeStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  REJECTED
+}
+
+enum ReportStatus {
+  OPEN
+  UNDER_REVIEW
+  ACTIONED
+  DISMISSED
+}
+
+enum SenderRole {
+  CUSTOMER
+  COOK
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  SUPPORT_AGENT
+  CITY_MANAGER
+}
+
+// ─── Identity ───────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  phone         String    @unique
+  name          String?
+  email         String?
+  preferredLang String    @default("en")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  addresses     Address[]
+  bookings      Booking[]
+  ratingsGiven  Rating[]  @relation("RatingsByCustomer")
+  reportsFiled  Report[]  @relation("ReportsByUser")
+}
+
+model Address {
+  id          String    @id @default(cuid())
+  userId      String
+  label       String    @default("Home")
+  line1       String
+  line2       String?
+  city        String
+  pincode     String
+  lat         Float?
+  lng         Float?
+  createdAt   DateTime  @default(now())
+
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bookings    Booking[]
+
+  @@index([userId])
+}
+
+model Cook {
+  id            String     @id @default(cuid())
+  phone         String     @unique
+  name          String
+  gender        String?
+  dob           DateTime?
+  languages     String     @default("") // comma-separated
+  experienceYrs Int        @default(0)
+  photoUrl      String?
+  bio           String?    @db.Text
+  status        CookStatus @default(PENDING_REVIEW)
+
+  // service area
+  baseLat       Float?
+  baseLng       Float?
+  radiusKm      Int        @default(5)
+  localities    String     @default("") // comma-separated, optional override of radius
+
+  // payout details
+  bankAccount   String?
+  bankIfsc      String?
+  upiId         String?
+
+  ratingAvg     Float      @default(0)
+  ratingCount   Int        @default(0)
+
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  documents     CookDocument[]
+  offerings     CookServiceOffering[]
+  availability  CookAvailability[]
+  bookings      Booking[]
+  payouts       Payout[]
+  ratings       Rating[]   @relation("RatingsForCook")
+}
+
+model CookDocument {
+  id         String         @id @default(cuid())
+  cookId     String
+  type       DocumentType
+  fileUrl    String
+  status     DocumentStatus @default(UPLOADED)
+  reviewedBy String?
+  reviewedAt DateTime?
+  createdAt  DateTime       @default(now())
+
+  cook       Cook           @relation(fields: [cookId], references: [id], onDelete: Cascade)
+
+  @@index([cookId])
+}
+
+model CookServiceOffering {
+  id            String      @id @default(cuid())
+  cookId        String
+  tier          ServiceTier
+  ratePaise     Int         // within admin-defined bounds for the tier
+  veg           Boolean     @default(true)
+  nonVeg        Boolean     @default(false)
+  cuisines      String      @default("") // comma-separated specialisations
+
+  cook          Cook        @relation(fields: [cookId], references: [id], onDelete: Cascade)
+
+  @@unique([cookId, tier])
+}
+
+model CookAvailability {
+  id         String   @id @default(cuid())
+  cookId     String
+  // recurring weekly window
+  weekday    Int      // 0=Sunday .. 6=Saturday
+  startMin   Int      // minutes from midnight, IST
+  endMin     Int
+
+  cook       Cook     @relation(fields: [cookId], references: [id], onDelete: Cascade)
+
+  @@index([cookId])
+}
+
+// ─── Catalog ────────────────────────────────────────────────────────────────────
+
+model Service {
+  tier          ServiceTier @id
+  name          String
+  description   String      @db.Text
+  billing       String      // "hourly" | "flat"
+  basePricePaise Int
+  minMinutes    Int
+  maxMinutes    Int
+  active        Boolean     @default(true)
+}
+
+// ─── Bookings ───────────────────────────────────────────────────────────────────
+
+model Booking {
+  id              String        @id @default(cuid())
+  customerId      String
+  cookId          String?
+  addressId       String
+  tier            ServiceTier
+  startAt         DateTime
+  durationMinutes Int
+  status          BookingStatus @default(PENDING)
+
+  // money, all paise
+  servicePaise    Int
+  platformFeePaise Int          @default(0)
+  taxPaise        Int           @default(0)
+  totalPaise      Int
+  cancellationFeePaise Int      @default(0)
+
+  cancelledBy     CancelledBy?
+  cancelReason    String?
+  autoAssign      Boolean       @default(false)
+  vegOnly         Boolean       @default(false)
+  genderPref      String?
+  notes           String?       @db.Text
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  customer        User          @relation(fields: [customerId], references: [id])
+  cook            Cook?         @relation(fields: [cookId], references: [id])
+  address         Address       @relation(fields: [addressId], references: [id])
+  statusEvents    BookingStatusEvent[]
+  messages        Message[]
+  callLogs        CallLog[]
+  transactions    Transaction[]
+  rating          Rating?
+  dispute         Dispute?
+
+  @@index([customerId])
+  @@index([cookId])
+  @@index([status])
+  @@index([startAt])
+}
+
+model BookingStatusEvent {
+  id        String        @id @default(cuid())
+  bookingId String
+  status    BookingStatus
+  note      String?
+  actor     String?       // userId / cookId / adminId / "system"
+  createdAt DateTime      @default(now())
+
+  booking   Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+}
+
+// ─── Communication (admin-reviewable) ───────────────────────────────────────────
+
+model Message {
+  id         String     @id @default(cuid())
+  bookingId  String
+  senderRole SenderRole
+  body       String     @db.Text
+  imageUrl   String?
+  createdAt  DateTime   @default(now())
+  readAt     DateTime?
+
+  booking    Booking    @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId, id])
+}
+
+model CallLog {
+  id          String   @id @default(cuid())
+  bookingId   String
+  initiatedBy SenderRole
+  durationSec Int      @default(0)
+  provider    String   @default("exotel")
+  providerRef String?
+  createdAt   DateTime @default(now())
+
+  booking     Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([bookingId])
+}
+
+// ─── Money ──────────────────────────────────────────────────────────────────────
+
+model Transaction {
+  id            String            @id @default(cuid())
+  bookingId     String
+  amountPaise   Int
+  status        TransactionStatus @default(CREATED)
+  provider      String            @default("razorpay")
+  providerOrderId String?         @unique
+  providerPaymentId String?
+  refundedPaise Int               @default(0)
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  booking       Booking           @relation(fields: [bookingId], references: [id])
+
+  @@index([bookingId])
+}
+
+model Payout {
+  id          String       @id @default(cuid())
+  cookId      String
+  periodStart DateTime
+  periodEnd   DateTime
+  grossPaise  Int
+  commissionPaise Int
+  netPaise    Int
+  status      PayoutStatus @default(PENDING)
+  provider    String       @default("razorpayx")
+  providerRef String?
+  createdAt   DateTime     @default(now())
+  paidAt      DateTime?
+
+  cook        Cook         @relation(fields: [cookId], references: [id])
+
+  @@index([cookId])
+}
+
+// ─── Feedback & safety ──────────────────────────────────────────────────────────
+
+model Rating {
+  id         String   @id @default(cuid())
+  bookingId  String   @unique
+  customerId String
+  cookId     String
+  stars      Int      // 1..5
+  tags       String   @default("") // comma-separated: Clean, Punctual, Tasty, Polite
+  comment    String?  @db.Text
+  createdAt  DateTime @default(now())
+
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  customer   User     @relation("RatingsByCustomer", fields: [customerId], references: [id])
+  cook       Cook     @relation("RatingsForCook", fields: [cookId], references: [id])
+
+  @@index([cookId])
+}
+
+model Dispute {
+  id         String        @id @default(cuid())
+  bookingId  String        @unique
+  openedBy   SenderRole
+  reason     String        @db.Text
+  status     DisputeStatus @default(OPEN)
+  resolution String?       @db.Text
+  refundPaise Int          @default(0)
+  handledBy  String?
+  createdAt  DateTime      @default(now())
+  resolvedAt DateTime?
+
+  booking    Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+}
+
+model Report {
+  id         String       @id @default(cuid())
+  userId     String?      // reporter (customer)
+  cookId     String?      // reporter (cook) or subject
+  bookingId  String?
+  category   String
+  detail     String       @db.Text
+  attachmentUrl String?
+  status     ReportStatus @default(OPEN)
+  actionTaken String?     @db.Text
+  handledBy  String?
+  createdAt  DateTime     @default(now())
+
+  user       User?        @relation("ReportsByUser", fields: [userId], references: [id])
+
+  @@index([status])
+}
+
+// ─── Config & auth ──────────────────────────────────────────────────────────────
+
+model AppConfig {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+}
+
+model OtpChallenge {
+  id         String   @id @default(cuid())
+  phone      String
+  codeHash   String
+  purpose    String   // "customer_login" | "cook_login"
+  attempts   Int      @default(0)
+  expiresAt  DateTime
+  consumedAt DateTime?
+  createdAt  DateTime @default(now())
+
+  @@index([phone])
+}
+
+model AdminUser {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  name         String
+  role         AdminRole @default(SUPPORT_AGENT)
+  active       Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  lastLoginAt  DateTime?
+}

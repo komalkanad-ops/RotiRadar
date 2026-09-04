@@ -1,0 +1,26 @@
+node_modules/
+dist/
+build/
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
+*.local
+secrets/
+.DS_Store
+
+# ── Kept local to the maintainer's laptop, never published ──────────────────
+# Native mobile apps (separate private repo) and internal docs / working notes.
+android/
+docs/
+CLAUDE.md
+.claude/
+.mcp.json
+rotiRadarWebsiteCode/
+untitled folder/
+
+# Prisma
+backend/prisma/migrations/dev.db*
+*.keystore
+*.jks
+google-services.json
