@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import * as Sentry from "@sentry/node";
 
 /**
  * Final error handler. A failed query must return a clean error to that one request, never crash
@@ -22,7 +23,15 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
 
   if (e.name === "PrismaClientRustPanicError") {
     console.error("Unrecoverable Prisma engine panic — exiting so the platform starts a fresh process");
-    setImmediate(() => process.exit(1));
+    // Explicit capture, not relying solely on Sentry.setupExpressErrorHandler's automatic hook —
+    // this exact panic went unreported to Sentry twice in a row on the live server (once with a
+    // bare process.exit() right after, once after adding a Sentry.close() flush first), so either
+    // the automatic handler isn't capturing this specific error shape or something about a Rust
+    // panic crossing the N-API boundary doesn't behave like a normal thrown JS Error. Capture and
+    // flush explicitly here as a second, independent path — Sentry dedupes, so capturing twice if
+    // the automatic hook *was* working all along is harmless.
+    Sentry.captureException(err);
+    Sentry.close(3000).finally(() => process.exit(1));
   }
 }
 
