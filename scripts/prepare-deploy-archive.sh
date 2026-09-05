@@ -39,7 +39,7 @@ python3 - "$WORKDIR/package.json" <<'PYEOF'
 import json, sys
 p = sys.argv[1]
 d = json.load(open(p))
-d["scripts"]["postinstall"] = "prisma generate && prisma migrate deploy"
+d["scripts"]["postinstall"] = "prisma migrate deploy"  # generated client already in dist/generated/
 d["scripts"]["build"] = "echo 'prebuilt at archive root - tsc skipped (OOMs on Hostinger shared hosting)'"
 d["scripts"]["start"] = "node server.js"
 json.dump(d, open(p, "w"), indent=2)
