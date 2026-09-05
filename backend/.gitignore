@@ -3,3 +3,4 @@ dist/
 .env
 *.local
 prisma/*.db
+src/generated/
