@@ -149,6 +149,80 @@ adminRouter.patch("/config", async (req, res) => {
   res.json(Object.fromEntries(rows.map((r) => [r.key, r.value])));
 });
 
+// ─── Reports (safety / conduct) ───────────────────────────────────────────────────
+
+const REPORT_STATUSES = ["OPEN", "UNDER_REVIEW", "ACTIONED", "DISMISSED"] as const;
+
+adminRouter.get("/reports", async (req, res) => {
+  const status = typeof req.query.status === "string" ? req.query.status : undefined;
+  if (status !== undefined && !REPORT_STATUSES.includes(status as (typeof REPORT_STATUSES)[number])) {
+    return res.status(400).json({ error: `status must be one of: ${REPORT_STATUSES.join(", ")}` });
+  }
+  const reports = await prisma.report.findMany({
+    where: status ? { status: status as (typeof REPORT_STATUSES)[number] } : undefined,
+    orderBy: { createdAt: "desc" },
+    ...paging(req),
+  });
+  res.json(reports);
+});
+
+const reviewReportSchema = z.object({
+  status: z.enum(REPORT_STATUSES),
+  actionTaken: z.string().max(4000).optional(),
+});
+
+adminRouter.patch("/reports/:id", async (req, res) => {
+  const parsed = reviewReportSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: "Invalid request" });
+  const report = await prisma.report.update({
+    where: { id: req.params.id },
+    data: { ...parsed.data, handledBy: req.auth!.sub },
+  });
+  res.json(report);
+});
+
+// ─── Disputes ─────────────────────────────────────────────────────────────────────
+
+const DISPUTE_STATUSES = ["OPEN", "UNDER_REVIEW", "RESOLVED", "REJECTED"] as const;
+
+adminRouter.get("/disputes", async (req, res) => {
+  const status = typeof req.query.status === "string" ? req.query.status : undefined;
+  if (status !== undefined && !DISPUTE_STATUSES.includes(status as (typeof DISPUTE_STATUSES)[number])) {
+    return res.status(400).json({ error: `status must be one of: ${DISPUTE_STATUSES.join(", ")}` });
+  }
+  const disputes = await prisma.dispute.findMany({
+    where: status ? { status: status as (typeof DISPUTE_STATUSES)[number] } : undefined,
+    orderBy: { createdAt: "desc" },
+    ...paging(req),
+  });
+  res.json(disputes);
+});
+
+const resolveDisputeSchema = z.object({
+  status: z.enum(["UNDER_REVIEW", "RESOLVED", "REJECTED"]),
+  resolution: z.string().max(4000).optional(),
+  refundPaise: z.number().int().min(0).optional(),
+});
+
+adminRouter.patch("/disputes/:id", async (req, res) => {
+  const parsed = resolveDisputeSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: "Invalid request" });
+  const { status, resolution, refundPaise } = parsed.data;
+  const terminal = status === "RESOLVED" || status === "REJECTED";
+
+  const dispute = await prisma.dispute.update({
+    where: { id: req.params.id },
+    data: {
+      status,
+      resolution,
+      ...(refundPaise !== undefined ? { refundPaise } : {}),
+      handledBy: req.auth!.sub,
+      ...(terminal ? { resolvedAt: new Date() } : {}),
+    },
+  });
+  res.json(dispute);
+});
+
 // ─── Admin users (SUPER_ADMIN only) ───────────────────────────────────────────────
 
 const ADMIN_ROLES = ["SUPER_ADMIN", "SUPPORT_AGENT", "CITY_MANAGER"] as const;
