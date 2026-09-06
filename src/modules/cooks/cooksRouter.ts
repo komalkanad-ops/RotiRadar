@@ -213,6 +213,80 @@ cooksRouter.get("/me/availability", requireAuth, async (req, res) => {
   res.json(slots);
 });
 
+// ─── Public directory (customer app) ──────────────────────────────────────────────
+
+// The public face of a cook — no phone, no DOB, no bank details, no exact base coordinates.
+function publicCook(cook: {
+  id: string;
+  name: string;
+  gender: string | null;
+  languages: string;
+  experienceYrs: number;
+  photoUrl: string | null;
+  bio: string | null;
+  localities: string;
+  ratingAvg: number;
+  ratingCount: number;
+  offerings?: { tier: string; ratePaise: number; veg: boolean; nonVeg: boolean; cuisines: string }[];
+}) {
+  return {
+    id: cook.id,
+    name: cook.name,
+    gender: cook.gender,
+    languages: fromCsv(cook.languages),
+    experienceYrs: cook.experienceYrs,
+    photoUrl: cook.photoUrl,
+    bio: cook.bio,
+    localities: fromCsv(cook.localities),
+    ratingAvg: cook.ratingAvg,
+    ratingCount: cook.ratingCount,
+    offerings: (cook.offerings ?? []).map((o) => ({
+      tier: o.tier,
+      ratePaise: o.ratePaise,
+      veg: o.veg,
+      nonVeg: o.nonVeg,
+      cuisines: fromCsv(o.cuisines),
+    })),
+  };
+}
+
+// GET /cooks/directory?tier=&locality=&page=&pageSize= — ACTIVE cooks the customer can browse and
+// book directly. No auth: the same public exposure as GET /ratings/cook/:id. Registered before the
+// admin `GET /cooks/:id` so "directory" isn't swallowed as an :id.
+cooksRouter.get("/directory", async (req, res) => {
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const pageSize = Math.min(50, Math.max(1, Number(req.query.pageSize) || 20));
+  const tier = typeof req.query.tier === "string" ? req.query.tier : undefined;
+  const locality = typeof req.query.locality === "string" ? req.query.locality.trim() : undefined;
+
+  if (tier !== undefined && !["BASIC", "SABJI", "FULL_MEAL"].includes(tier)) {
+    return res.status(400).json({ error: "tier must be one of: BASIC, SABJI, FULL_MEAL" });
+  }
+
+  const cooks = await prisma.cook.findMany({
+    where: {
+      status: "ACTIVE",
+      ...(tier ? { offerings: { some: { tier: tier as "BASIC" | "SABJI" | "FULL_MEAL" } } } : {}),
+      ...(locality ? { localities: { contains: locality } } : {}),
+    },
+    include: { offerings: true },
+    orderBy: [{ ratingCount: "desc" }, { ratingAvg: "desc" }],
+    skip: (page - 1) * pageSize,
+    take: pageSize,
+  });
+  res.json(cooks.map(publicCook));
+});
+
+// GET /cooks/directory/:id — one ACTIVE cook's public profile + offerings.
+cooksRouter.get("/directory/:id", async (req, res) => {
+  const cook = await prisma.cook.findUnique({
+    where: { id: req.params.id },
+    include: { offerings: true },
+  });
+  if (!cook || cook.status !== "ACTIVE") return res.status(404).json({ error: "Not found" });
+  res.json(publicCook(cook));
+});
+
 // ─── Admin: KYC review ────────────────────────────────────────────────────────────
 
 const COOK_STATUSES = ["PENDING_REVIEW", "ACTIVE", "SUSPENDED", "REJECTED"] as const;
