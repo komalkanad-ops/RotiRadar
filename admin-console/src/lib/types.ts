@@ -111,6 +111,8 @@ export interface Report {
   userId: string | null;
   cookId: string | null;
   attachmentUrl: string | null;
+  /** JSON string of the in-app context sent with bug reports / suggestions. */
+  appContext: string | null;
   status: string;
   actionTaken: string | null;
   handledBy: string | null;

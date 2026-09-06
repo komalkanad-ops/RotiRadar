@@ -5,13 +5,13 @@ const APPS = [
     name: "RotiRadar",
     who: "For your kitchen",
     body: "Book a verified cook, pick your slot, track them to your door, and pay in the app.",
-    href: "/downloads/rotiradar-user.apk",
+    href: "https://downloads.rotiradar.in/rotiradar-user.apk",
   },
   {
     name: "RotiRadar for Cooks",
     who: "Cook with us",
     body: "Set your rates and availability, accept jobs nearby, and see what you've earned.",
-    href: "/downloads/rotiradar-cook.apk",
+    href: "https://downloads.rotiradar.in/rotiradar-cook.apk",
   },
 ];
 
