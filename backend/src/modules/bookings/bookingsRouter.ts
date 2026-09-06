@@ -266,8 +266,27 @@ bookingsRouter.get("/", requireAuth, async (req, res) => {
   res.json(bookings);
 });
 
-// GET /bookings/:id — full detail incl. status history, for polling. Only the owning customer or
-// assigned cook can see it; anyone else gets 404 (not 403 — don't confirm it exists).
+// GET /bookings/available — cook only. The open pool of PENDING, not-yet-assigned bookings any
+// ACTIVE cook can self-assign via POST /:id/accept. There's no geo/availability dispatch yet
+// (see the create-booking comment) — this is the interim "jobs board" the cook app polls.
+bookingsRouter.get("/available", requireAuth, async (req, res) => {
+  const cookId = requireCook(req, res);
+  if (!cookId) return;
+
+  const cook = await prisma.cook.findUnique({ where: { id: cookId }, select: { status: true } });
+  if (!cook || cook.status !== "ACTIVE") return res.json([]); // only ACTIVE cooks can pick up work
+
+  const bookings = await prisma.booking.findMany({
+    where: { status: "PENDING", cookId: null },
+    orderBy: { startAt: "asc" },
+    take: 50,
+  });
+  res.json(bookings);
+});
+
+// GET /bookings/:id — full detail incl. status history, for polling. The owning customer, the
+// assigned cook, or (so a cook can look before accepting) any cook viewing a still-open PENDING
+// booking. Everyone else gets 404 — don't confirm it exists.
 bookingsRouter.get("/:id", requireAuth, async (req, res) => {
   const { sub, role } = req.auth!;
 
@@ -276,7 +295,10 @@ bookingsRouter.get("/:id", requireAuth, async (req, res) => {
     include: { statusEvents: { orderBy: { createdAt: "asc" } } },
   });
   if (!booking) return res.status(404).json({ error: "Not found" });
-  const owns = (role === "CUSTOMER" && booking.customerId === sub) || (role === "COOK" && booking.cookId === sub);
+  const owns =
+    (role === "CUSTOMER" && booking.customerId === sub) ||
+    (role === "COOK" && booking.cookId === sub) ||
+    (role === "COOK" && booking.cookId === null && booking.status === "PENDING");
   if (!owns) return res.status(404).json({ error: "Not found" });
   res.json(booking);
 });
