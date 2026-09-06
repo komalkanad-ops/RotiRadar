@@ -8,6 +8,7 @@ import Safety from "../sections/Safety";
 import Stats from "../sections/Stats";
 import ForCooks from "../sections/ForCooks";
 import Faq from "../sections/Faq";
+import Download from "../sections/Download";
 import Contact from "../sections/Contact";
 
 export default function Home() {
@@ -37,6 +38,7 @@ export default function Home() {
       <Stats />
       <ForCooks />
       <Faq />
+      <Download />
       <Contact />
     </>
   );

@@ -98,6 +98,7 @@ function Footer() {
               <FooterLink to="/#how-it-works">How it works</FooterLink>
               <FooterLink to="/#pricing">Pricing</FooterLink>
               <FooterLink to="/#safety">Safety</FooterLink>
+              <FooterLink to="/#get-app">Download the app</FooterLink>
             </div>
             <div className="space-y-2">
               <FooterLink to="/#for-cooks">For cooks</FooterLink>

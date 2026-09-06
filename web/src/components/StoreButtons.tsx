@@ -44,7 +44,7 @@ function Badge({ glyph, top, name, href }: { glyph: React.ReactNode; top: string
 
 export default function StoreButtons({ playUrl, appStoreUrl, className = "" }: Props) {
   return (
-    <div id="get-app" className={`flex flex-wrap gap-3 ${className}`}>
+    <div className={`flex flex-wrap gap-3 ${className}`}>
       <Badge glyph={<PlayGlyph />} top={playUrl ? "Get it on" : "Coming soon to"} name="Google Play" href={playUrl} />
       <Badge glyph={<AppleGlyph />} top="Later on the" name="App Store" href={appStoreUrl} />
     </div>
