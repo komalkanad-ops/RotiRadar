@@ -158,8 +158,21 @@ adminRouter.get("/reports", async (req, res) => {
   if (status !== undefined && !REPORT_STATUSES.includes(status as (typeof REPORT_STATUSES)[number])) {
     return res.status(400).json({ error: `status must be one of: ${REPORT_STATUSES.join(", ")}` });
   }
+  // `category` filter: exact match, or the pseudo-value "feedback" for bug reports + suggestions
+  // (what the in-app widget files).
+  const category = typeof req.query.category === "string" ? req.query.category : undefined;
+  const categoryWhere =
+    category === "feedback"
+      ? { category: { in: ["bug", "suggestion"] } }
+      : category
+        ? { category }
+        : {};
+
   const reports = await prisma.report.findMany({
-    where: status ? { status: status as (typeof REPORT_STATUSES)[number] } : undefined,
+    where: {
+      ...(status ? { status: status as (typeof REPORT_STATUSES)[number] } : {}),
+      ...categoryWhere,
+    },
     orderBy: { createdAt: "desc" },
     ...paging(req),
   });
