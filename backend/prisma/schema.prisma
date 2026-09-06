@@ -397,6 +397,7 @@ model Report {
   category   String
   detail     String       @db.Text
   attachmentUrl String?
+  appContext String?      @db.Text // JSON: screen, appVersion, device, os, role, ... (bug reports)
   status     ReportStatus @default(OPEN)
   actionTaken String?     @db.Text
   handledBy  String?

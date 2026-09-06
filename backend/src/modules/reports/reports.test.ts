@@ -50,6 +50,27 @@ describe("reports", () => {
     expect(triaged.body.handledBy).toBe("vitest-admin-rep");
   });
 
+  it("stores app context on a bug report and filters by category=feedback", async () => {
+    const filed = await request(app)
+      .post("/reports")
+      .set("Authorization", `Bearer ${customerToken}`)
+      .send({
+        category: "bug",
+        detail: "Payment screen spun forever.",
+        context: { screen: "pay/123", appVersion: "0.1.0", device: "Pixel 7", os: "Android 14" },
+      });
+    expect(filed.status).toBe(201);
+    expect(filed.body.appContext).toContain("Pixel 7");
+    expect(filed.body.appContext).toContain("serverRole");
+
+    const feedback = await request(app)
+      .get("/admin/reports?category=feedback")
+      .set("Authorization", `Bearer ${adminToken}`);
+    expect(feedback.status).toBe(200);
+    expect(feedback.body.some((r: { id: string }) => r.id === filed.body.id)).toBe(true);
+    expect(feedback.body.every((r: { category: string }) => ["bug", "suggestion"].includes(r.category))).toBe(true);
+  });
+
   it("rejects an empty detail and a bad bookingId", async () => {
     const empty = await request(app)
       .post("/reports")
