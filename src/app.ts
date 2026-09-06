@@ -12,6 +12,7 @@ import { servicesRouter } from "./modules/services/servicesRouter.js";
 import { authRouter } from "./modules/auth/authRouter.js";
 import { cooksRouter } from "./modules/cooks/cooksRouter.js";
 import { bookingsRouter } from "./modules/bookings/bookingsRouter.js";
+import { chatRouter } from "./modules/chat/chatRouter.js";
 
 // Just the Express app — no listen(), no schedulers. Separated from server.ts so tests can import
 // and exercise it with Supertest without opening a socket.
@@ -64,7 +65,7 @@ app.use("/services", servicesRouter);
 app.use("/auth", authRouter);
 app.use("/cooks", cooksRouter);
 app.use("/bookings", bookingsRouter);
-// app.use("/chat", chatRouter);
+app.use("/chat", chatRouter);
 // app.use("/payments", paymentsRouter);
 // app.use("/admin", adminRouter);
 

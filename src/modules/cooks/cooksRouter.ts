@@ -16,7 +16,7 @@ function fromCsv(csv: string): string[] {
 
 function serializeCook(cook: {
   id: string;
-  phone: string;
+  phone: string | null;
   name: string;
   gender: string | null;
   dob: Date | null;
