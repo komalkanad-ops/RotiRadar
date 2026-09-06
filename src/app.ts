@@ -15,6 +15,9 @@ import { bookingsRouter } from "./modules/bookings/bookingsRouter.js";
 import { chatRouter } from "./modules/chat/chatRouter.js";
 import { paymentsRouter } from "./modules/payments/paymentsRouter.js";
 import { adminRouter } from "./modules/admin/adminRouter.js";
+import { ratingsRouter } from "./modules/ratings/ratingsRouter.js";
+import { reportsRouter } from "./modules/reports/reportsRouter.js";
+import { disputesRouter } from "./modules/disputes/disputesRouter.js";
 
 // Just the Express app — no listen(), no schedulers. Separated from server.ts so tests can import
 // and exercise it with Supertest without opening a socket.
@@ -70,6 +73,9 @@ app.use("/bookings", bookingsRouter);
 app.use("/chat", chatRouter);
 app.use("/payments", paymentsRouter);
 app.use("/admin", adminRouter);
+app.use("/ratings", ratingsRouter);
+app.use("/reports", reportsRouter);
+app.use("/disputes", disputesRouter);
 
 Sentry.setupExpressErrorHandler(app);
 app.use(errorHandler);
