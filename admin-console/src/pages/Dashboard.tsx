@@ -1,51 +1,49 @@
-import { useNavigate } from "react-router-dom";
-import { LayoutDashboard, Users, CalendarClock, MessageSquareWarning, Wallet, Settings } from "lucide-react";
-import { clearToken } from "../lib/api";
-
-// Scaffold shell. Phase 1 fills these sections in against the backend admin routes
-// (see docs/architecture.md and the product outline §6).
-const SECTIONS = [
-  { icon: LayoutDashboard, label: "Overview", note: "bookings, active cooks/users, revenue, disputes" },
-  { icon: Users, label: "Users & cooks", note: "search, profiles, KYC approval, suspend/ban" },
-  { icon: CalendarClock, label: "Bookings", note: "filter by status, reassign, force-cancel, mark disputed" },
-  { icon: MessageSquareWarning, label: "Reports & chats", note: "review reported conversations, act on abuse" },
-  { icon: Wallet, label: "Payments & payouts", note: "transactions, refunds, cook payout runs" },
-  { icon: Settings, label: "Configuration", note: "prices, commission, taxes, cancellation windows" },
-];
+import { useApi, fmtPaise } from "../lib/useApi";
+import type { Stats } from "../lib/types";
+import { PageHeader, Stat, Card, Loading, ErrorNote, Pill } from "../components/ui";
 
 export default function Dashboard() {
-  const nav = useNavigate();
+  const { data, error, loading, reload } = useApi<Stats>("/admin/stats");
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl">RotiRadar Admin</h1>
-        <button
-          onClick={() => {
-            clearToken();
-            nav("/login", { replace: true });
-          }}
-          className="rounded-lg border border-char/25 px-3 py-1.5 text-sm hover:border-char/60"
-        >
-          Sign out
-        </button>
-      </div>
-
-      <p className="mt-2 text-sm text-char-soft">
-        Scaffold — no data yet. Sections below are wired up in Phase 1.
-      </p>
-
-      <div className="mt-8 grid gap-4 sm:grid-cols-2">
-        {SECTIONS.map(({ icon: Icon, label, note }) => (
-          <div key={label} className="rounded-xl border border-char/15 p-5">
-            <div className="flex items-center gap-2.5">
-              <Icon size={18} className="text-flame" />
-              <h2 className="font-display text-lg">{label}</h2>
-            </div>
-            <p className="mt-2 text-sm text-char-soft">{note}</p>
+    <>
+      <PageHeader title="Dashboard" />
+      {loading && <Loading />}
+      {error && <ErrorNote error={error} onRetry={reload} />}
+      {data && (
+        <div className="space-y-6">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <Stat label="Customers" value={data.users} />
+            <Stat label="Active cooks" value={data.cooks.ACTIVE ?? 0} />
+            <Stat label="Pending KYC docs" value={data.pendingKycDocuments} />
+            <Stat label="Gross collected" value={fmtPaise(data.grossPaidPaise)} />
           </div>
-        ))}
-      </div>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card title="Cooks by status">
+              <StatusRows counts={data.cooks} />
+            </Card>
+            <Card title="Bookings by status">
+              <StatusRows counts={data.bookings} />
+            </Card>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
+function StatusRows({ counts }: { counts: Record<string, number> }) {
+  const entries = Object.entries(counts);
+  if (entries.length === 0) return <p className="text-sm text-char-soft">None yet.</p>;
+  return (
+    <div className="space-y-2">
+      {entries.map(([status, n]) => (
+        <div key={status} className="flex items-center justify-between">
+          <Pill value={status} />
+          <span className="font-display font-semibold">{n}</span>
+        </div>
+      ))}
     </div>
   );
 }
