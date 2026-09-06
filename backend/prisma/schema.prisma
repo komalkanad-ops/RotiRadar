@@ -3,20 +3,15 @@
 // Money is stored as integer paise. Times are DateTime (UTC in the DB; slots are reasoned about in IST).
 // See docs/architecture.md for the entity overview.
 
-// Prisma 7, Rust-free: no query-engine binary at all (not "library" vs "binary" — there's no
-// native engine in the picture), via a driver adapter (see src/lib/prisma.ts). Adopted because the
-// Rust engine's embedded async runtime hits an unrecoverable `PrismaClientRustPanicError: PANIC:
-// timer has gone away` on every single query on Hostinger's Node.js hosting (confirmed
-// deterministic — see CLAUDE.md "Known-fragile Hostinger things" #1). This sidesteps it entirely.
 generator client {
-  provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"
+  // No engineType override — the default (library) engine only. The binary engine spawns a
+  // subprocess per client and fails with EAGAIN on Hostinger's low process ulimit (CLAUDE.md #3).
 }
 
 datasource db {
   provider = "mysql"
-  // No `url` here in v7 — the CLI reads it from prisma.config.ts; the app constructs its own
-  // driver-adapter connection from DATABASE_URL directly (see src/lib/prisma.ts).
+  url      = env("DATABASE_URL")
 }
 
 // ─── Enums ──────────────────────────────────────────────────────────────────────

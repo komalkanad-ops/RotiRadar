@@ -1,10 +1,11 @@
 // Standalone entrypoint (`tsx seed/seed.ts`) — unlike src/app.ts, nothing else here loads .env.
 import "dotenv/config";
-import { prisma } from "../src/lib/prisma.js";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 // Seeds the service catalog, default AppConfig, and the bootstrap admin. Idempotent — safe to run
 // on every deploy. Prices here mirror web/src/lib/pricing.ts exactly.
+const prisma = new PrismaClient();
 
 // Mirrors web/src/lib/pricing.ts. Every tier is billed per visit.
 const SERVICES = [
