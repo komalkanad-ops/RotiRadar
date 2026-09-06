@@ -102,7 +102,9 @@ enum AdminRole {
 
 model User {
   id            String    @id @default(cuid())
-  phone         String    @unique
+  phone         String?   @unique // null for guest (skip-login) accounts
+  deviceId      String?   @unique // set for guest accounts, keyed on the client-generated id
+  authProvider  String    @default("otp") // "otp" | "guest"
   name          String?
   email         String?
   preferredLang String    @default("en")
@@ -135,7 +137,9 @@ model Address {
 
 model Cook {
   id            String     @id @default(cuid())
-  phone         String     @unique
+  phone         String?    @unique // null for guest (skip-login) accounts
+  deviceId      String?    @unique // set for guest accounts, keyed on the client-generated id
+  authProvider  String     @default("otp") // "otp" | "guest"
   name          String
   gender        String?
   dob           DateTime?

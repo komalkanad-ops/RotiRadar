@@ -98,6 +98,42 @@ authRouter.post("/otp/verify", async (req, res) => {
   res.json({ token: issueToken({ sub: user.id, role: "CUSTOMER" }), role: "CUSTOMER", id: user.id });
 });
 
+// ─── Guest / skip-login (testing only) ──────────────────────────────────────────
+
+const guestSchema = z.object({
+  role: z.enum(["customer", "cook"]),
+  deviceId: z.string().min(8).max(128),
+  name: z.string().min(1).max(120).optional(),
+});
+
+// POST /auth/guest — { role, deviceId, name? } — the "Skip login" path. Issues a real token for a
+// throwaway identity keyed on a client-generated deviceId; no phone, authProvider="guest".
+// TODO(before real launch): gate this behind a feature flag or remove it. Disabled when
+// ALLOW_GUEST_LOGIN=false. See NEXT-ACTIONS.md.
+authRouter.post("/guest", authLimiter, async (req, res) => {
+  if (process.env.ALLOW_GUEST_LOGIN === "false") return res.status(404).json({ error: "Not found" });
+
+  const parsed = guestSchema.safeParse(req.body);
+  if (!parsed.success) return res.status(400).json({ error: "Invalid request" });
+  const { role, deviceId, name } = parsed.data;
+
+  if (role === "cook") {
+    const cook = await prisma.cook.upsert({
+      where: { deviceId },
+      create: { deviceId, name: name ?? "Guest Cook", authProvider: "guest" },
+      update: {},
+    });
+    return res.json({ token: issueToken({ sub: cook.id, role: "COOK" }), role: "COOK", id: cook.id });
+  }
+
+  const user = await prisma.user.upsert({
+    where: { deviceId },
+    create: { deviceId, name, authProvider: "guest" },
+    update: {},
+  });
+  res.json({ token: issueToken({ sub: user.id, role: "CUSTOMER" }), role: "CUSTOMER", id: user.id });
+});
+
 // ─── Admin (email + password) ────────────────────────────────────────────────────
 
 // POST /auth/admin/bootstrap — one-time: creates the first admin from ADMIN_BOOTSTRAP_EMAIL/

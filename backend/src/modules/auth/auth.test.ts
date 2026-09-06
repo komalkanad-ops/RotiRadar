@@ -8,15 +8,40 @@ import { prisma } from "../../lib/prisma.js";
 // one) never mixes with genuine user/admin data. Cleaned up in afterAll regardless of pass/fail.
 const CUSTOMER_PHONE = "+911000000001";
 const COOK_PHONE = "+911000000002";
+const GUEST_DEVICE = "vitest-guest-device-0001";
+const GUEST_COOK_DEVICE = "vitest-guest-device-0002";
 const THROWAWAY_ADMIN_EMAIL = "vitest-throwaway-admin@rotiradar.test";
 const THROWAWAY_ADMIN_PASSWORD = "vitest-only-password-not-real";
 
 describe("auth", () => {
   afterAll(async () => {
     await prisma.otpChallenge.deleteMany({ where: { phone: { in: [CUSTOMER_PHONE, COOK_PHONE] } } });
-    await prisma.user.deleteMany({ where: { phone: CUSTOMER_PHONE } });
-    await prisma.cook.deleteMany({ where: { phone: COOK_PHONE } });
+    await prisma.user.deleteMany({ where: { OR: [{ phone: CUSTOMER_PHONE }, { deviceId: GUEST_DEVICE }] } });
+    await prisma.cook.deleteMany({ where: { OR: [{ phone: COOK_PHONE }, { deviceId: GUEST_COOK_DEVICE }] } });
     await prisma.adminUser.deleteMany({ where: { email: THROWAWAY_ADMIN_EMAIL } });
+  });
+
+  it("skip-login: issues a guest token (idempotent per deviceId), no phone", async () => {
+    const first = await request(app).post("/auth/guest").send({ role: "customer", deviceId: GUEST_DEVICE });
+    expect(first.status).toBe(200);
+    expect(first.body.role).toBe("CUSTOMER");
+    expect(first.body.token).toBeTruthy();
+
+    const again = await request(app).post("/auth/guest").send({ role: "customer", deviceId: GUEST_DEVICE });
+    expect(again.body.id).toBe(first.body.id);
+
+    const me = await request(app).get("/auth/me").set("Authorization", `Bearer ${first.body.token}`);
+    expect(me.status).toBe(200);
+    expect(me.body.phone).toBeNull();
+  });
+
+  it("skip-login: guest cook gets a default name; short deviceId is rejected", async () => {
+    const cook = await request(app).post("/auth/guest").send({ role: "cook", deviceId: GUEST_COOK_DEVICE });
+    expect(cook.status).toBe(200);
+    expect(cook.body.role).toBe("COOK");
+
+    const bad = await request(app).post("/auth/guest").send({ role: "customer", deviceId: "short" });
+    expect(bad.status).toBe(400);
   });
 
   it("rejects an invalid phone on otp/request", async () => {
