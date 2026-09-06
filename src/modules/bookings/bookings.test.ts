@@ -211,4 +211,24 @@ describe("bookings", () => {
     expect(asOtherCook.status).toBe(200);
     expect(asOtherCook.body.every((b: { cookId: string }) => b.cookId === otherCookId)).toBe(true);
   });
+
+  it("lists unassigned PENDING bookings on GET /bookings/available for an ACTIVE cook", async () => {
+    const open = await createBooking({ cookId: undefined, autoAssign: true });
+    expect(open.status).toBe(201);
+
+    const board = await request(app).get("/bookings/available").set("Authorization", `Bearer ${cookToken}`);
+    expect(board.status).toBe(200);
+    expect(board.body.map((b: { id: string }) => b.id)).toContain(open.body.id);
+    expect(board.body.every((b: { cookId: string | null; status: string }) => b.cookId === null && b.status === "PENDING")).toBe(true);
+
+    // once a cook accepts it, it drops off the board
+    await request(app).post(`/bookings/${open.body.id}/accept`).set("Authorization", `Bearer ${cookToken}`);
+    const after = await request(app).get("/bookings/available").set("Authorization", `Bearer ${cookToken}`);
+    expect(after.body.map((b: { id: string }) => b.id)).not.toContain(open.body.id);
+  });
+
+  it("rejects GET /bookings/available for a customer", async () => {
+    const res = await request(app).get("/bookings/available").set("Authorization", `Bearer ${customerToken}`);
+    expect(res.status).toBe(403);
+  });
 });
