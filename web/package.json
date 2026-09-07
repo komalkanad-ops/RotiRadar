@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && npm run build:admin",
+    "build:admin": "(cd ../admin-console && npm ci && npm run build) && rm -rf dist/admin && cp -r ../admin-console/dist dist/admin",
     "preview": "vite preview",
     "lint": "eslint . --ext .ts,.tsx",
     "typecheck": "tsc -b"

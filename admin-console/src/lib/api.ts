@@ -1,4 +1,8 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:4000";
+// Prod builds (rotiradar.in/admin) always talk to the live API. Dev/other builds honour
+// VITE_API_BASE_URL, falling back to a local backend.
+const API_BASE_URL =
+  import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.PROD ? "https://api.rotiradar.in" : "http://localhost:4000");
 const TOKEN_KEY = "rr_admin_token";
 
 export function getToken() {

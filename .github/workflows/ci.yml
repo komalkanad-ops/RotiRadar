@@ -1,7 +1,8 @@
 name: CI
 
 # Safety net, not a deploy pipeline. Deploy flow:
-#   - web/ and admin-console/  -> Hostinger static-site Git import from `main`
+#   - web/                     -> Hostinger static-site Git import from `main`
+#                                 (its build nests admin-console/ into web/dist/admin -> rotiradar.in/admin)
 #   - backend/                 -> `git subtree split --prefix=backend -b backend-root` then force-push
 # This just gates every push/PR with typecheck + build so a broken tree never reaches those imports.
 on:
@@ -32,7 +33,9 @@ jobs:
       - run: npm run lint
       - run: npm run typecheck
       # tsc alone won't catch a Vite-specific failure (asset/import resolution) — `npm run build`
-      # is what the Hostinger static-site import runs, so that's what CI verifies.
+      # is what the Hostinger static-site import runs, so that's what CI verifies. Note: web's
+      # `build` also chains `build:admin` (builds admin-console into web/dist/admin — that's how
+      # rotiradar.in/admin is served), so this step needs ../admin-console checked out too.
       - run: npm run build
 
   admin-console:

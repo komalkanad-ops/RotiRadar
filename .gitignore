@@ -8,6 +8,7 @@ build/
 *.local
 secrets/
 .DS_Store
+.playwright-mcp/
 
 # ── Kept local to the maintainer's laptop, never published ──────────────────
 # Native mobile apps (separate private repo) and internal docs / working notes.
