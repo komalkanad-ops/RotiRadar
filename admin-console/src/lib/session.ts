@@ -4,6 +4,7 @@ export interface AdminClaims {
   sub: string;
   role: "ADMIN";
   adminRole?: "SUPER_ADMIN" | "SUPPORT_AGENT" | "CITY_MANAGER";
+  email?: string;
 }
 
 // Reads the admin's role out of the JWT payload for UI gating only. The server re-checks every

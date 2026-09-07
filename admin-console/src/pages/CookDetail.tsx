@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { api } from "../lib/api";
-import { useApi, fmtDate } from "../lib/useApi";
-import type { Cook } from "../lib/types";
-import { PageHeader, Card, Table, Pill, Loading, ErrorNote, Btn } from "../components/ui";
+import { useApi, fmtDate, fmtPaise } from "../lib/useApi";
+import type { Cook, CookEarnings } from "../lib/types";
+import { PageHeader, Card, Table, Pill, Loading, ErrorNote, Btn, Stat } from "../components/ui";
 
 const COOK_ACTIONS = ["ACTIVE", "SUSPENDED", "REJECTED", "PENDING_REVIEW"];
 
@@ -77,6 +77,8 @@ export default function CookDetail() {
             </div>
           </Card>
 
+          <EarningsCard id={id!} />
+
           <Card title="KYC documents">
             {data.documents && data.documents.length > 0 ? (
               <Table head={["Type", "Status", "Uploaded", "File", ""]}>
@@ -114,6 +116,30 @@ export default function CookDetail() {
         </div>
       )}
     </>
+  );
+}
+
+function EarningsCard({ id }: { id: string }) {
+  const { data, error, loading } = useApi<CookEarnings>(`/cooks/${id}/earnings`);
+  return (
+    <Card title="Earnings">
+      {loading && <p className="text-sm text-char-soft">Loading…</p>}
+      {error && <ErrorNote error={error} />}
+      {data && (
+        <>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+            <Stat label="Completed jobs" value={data.completedJobs} />
+            <Stat label="Gross" value={fmtPaise(data.grossPaise)} />
+            <Stat label="Commission" value={fmtPaise(data.commissionPaise)} />
+            <Stat label="Net to cook" value={fmtPaise(data.netPaise)} />
+          </div>
+          <p className="mt-3 text-xs text-char-soft">
+            Last completed job: {data.lastCompletedAt ? fmtDate(data.lastCompletedAt) : "—"} · payout runs are
+            not automated yet (Phase 2)
+          </p>
+        </>
+      )}
+    </Card>
   );
 }
 

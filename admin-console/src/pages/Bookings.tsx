@@ -1,7 +1,7 @@
 import { useSearchParams, Link } from "react-router-dom";
 import { useApi, fmtDate, fmtPaise } from "../lib/useApi";
 import type { Booking } from "../lib/types";
-import { PageHeader, Table, Pill, Loading, ErrorNote } from "../components/ui";
+import { PageHeader, Table, Pill, Loading, ErrorNote, Btn, csvDownload } from "../components/ui";
 
 const STATUSES = ["PENDING", "ACCEPTED", "ON_THE_WAY", "IN_PROGRESS", "COMPLETED", "CANCELLED"];
 
@@ -13,6 +13,22 @@ export default function Bookings() {
   return (
     <>
       <PageHeader title="Bookings">
+        <Btn
+          disabled={loading || !data || data.length === 0}
+          onClick={() =>
+            data &&
+            csvDownload("bookings.csv", data, [
+              { key: "startAt", header: "Slot", value: (b) => fmtDate(b.startAt) },
+              { key: "tier", header: "Tier" },
+              { key: "status", header: "Status" },
+              { key: "totalPaise", header: "Total (₹)", value: (b) => (b.totalPaise / 100).toFixed(2) },
+              { key: "cookId", header: "Cook", value: (b) => (b.cookId ? "assigned" : "unassigned") },
+              { key: "id", header: "Booking ID" },
+            ])
+          }
+        >
+          Export CSV
+        </Btn>
         <select
           value={status}
           onChange={(e) => setParams(e.target.value ? { status: e.target.value } : {})}

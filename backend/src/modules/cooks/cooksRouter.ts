@@ -317,6 +317,37 @@ cooksRouter.get("/:id", requireAdmin, async (req, res) => {
   res.json({ ...serializeCook(profile), documents });
 });
 
+// GET /cooks/:id/earnings — admin read-only earnings summary from the cook's COMPLETED bookings.
+// (Actual payout runs are Phase 2; this is just the view.)
+cooksRouter.get("/:id/earnings", requireAdmin, async (req, res) => {
+  const cook = await prisma.cook.findUnique({ where: { id: req.params.id }, select: { id: true } });
+  if (!cook) return res.status(404).json({ error: "Not found" });
+
+  const completed = await prisma.booking.findMany({
+    where: { cookId: req.params.id, status: "COMPLETED" },
+    select: { servicePaise: true, startAt: true },
+  });
+
+  const grossPaise = completed.reduce((sum, b) => sum + b.servicePaise, 0);
+  const lastCompletedAt =
+    completed.length === 0
+      ? null
+      : completed.reduce((max, b) => (b.startAt > max ? b.startAt : max), completed[0].startAt);
+
+  const commissionRow = await prisma.appConfig.findUnique({ where: { key: "cook_commission_percent" } });
+  const commissionPercent = commissionRow ? Number(commissionRow.value) || 0 : 0;
+  const commissionPaise = Math.round((grossPaise * commissionPercent) / 100);
+
+  res.json({
+    cookId: req.params.id,
+    completedJobs: completed.length,
+    grossPaise,
+    commissionPaise,
+    netPaise: grossPaise - commissionPaise,
+    lastCompletedAt,
+  });
+});
+
 const setCookStatusSchema = z.object({ status: z.enum(COOK_STATUSES) });
 
 // PATCH /cooks/:id/status — { status } — admin moves a cook through the KYC lifecycle

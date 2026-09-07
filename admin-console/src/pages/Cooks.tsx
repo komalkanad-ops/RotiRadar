@@ -1,7 +1,7 @@
 import { useSearchParams, Link } from "react-router-dom";
 import { useApi, fmtDate } from "../lib/useApi";
 import type { Cook } from "../lib/types";
-import { PageHeader, Table, Pill, Loading, ErrorNote } from "../components/ui";
+import { PageHeader, Table, Pill, Loading, ErrorNote, Btn, csvDownload } from "../components/ui";
 
 const STATUSES = ["PENDING_REVIEW", "ACTIVE", "SUSPENDED", "REJECTED"];
 
@@ -13,6 +13,25 @@ export default function Cooks() {
   return (
     <>
       <PageHeader title="Cooks & KYC">
+        <Btn
+          disabled={loading || !data || data.length === 0}
+          onClick={() =>
+            data &&
+            csvDownload("cooks.csv", data, [
+              { key: "name", header: "Name" },
+              { key: "phone", header: "Phone", value: (c) => c.phone ?? "" },
+              { key: "status", header: "Status" },
+              {
+                key: "ratingAvg",
+                header: "Rating",
+                value: (c) => (c.ratingCount ? `${c.ratingAvg.toFixed(1)} (${c.ratingCount})` : ""),
+              },
+              { key: "createdAt", header: "Joined", value: (c) => fmtDate(c.createdAt) },
+            ])
+          }
+        >
+          Export CSV
+        </Btn>
         <select
           value={status}
           onChange={(e) => setParams(e.target.value ? { status: e.target.value } : {})}

@@ -9,6 +9,23 @@ export interface Stats {
   pendingKycDocuments: number;
 }
 
+export interface TimeseriesPoint {
+  date: string; // YYYY-MM-DD (UTC)
+  bookings: number;
+  completed: number;
+  cancelled: number;
+  revenuePaise: number;
+}
+
+export interface CookEarnings {
+  cookId: string;
+  completedJobs: number;
+  grossPaise: number;
+  commissionPaise: number;
+  netPaise: number;
+  lastCompletedAt: string | null;
+}
+
 export interface Cook {
   id: string;
   phone: string | null;

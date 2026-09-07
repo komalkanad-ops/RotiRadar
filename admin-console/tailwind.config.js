@@ -14,8 +14,8 @@ export default {
         clay: "#B0492B",
       },
       fontFamily: {
-        display: ['"Bricolage Grotesque"', "system-ui", "sans-serif"],
-        sans: ["Inter", "system-ui", "sans-serif"],
+        display: ["Fraunces", "Georgia", "serif"],
+        sans: ['"DM Sans"', "system-ui", "sans-serif"],
       },
     },
   },

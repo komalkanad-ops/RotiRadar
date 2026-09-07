@@ -54,6 +54,59 @@ adminRouter.get("/stats", async (_req, res) => {
   });
 });
 
+// GET /admin/stats/timeseries?days=30 — one row per UTC day for the last `days` days (oldest
+// first), gaps filled with zeros. `days` must be an integer 7..90 (default 30).
+adminRouter.get("/stats/timeseries", async (req, res) => {
+  const raw = req.query.days;
+  let days = 30;
+  if (raw !== undefined) {
+    const n = Number(raw);
+    if (!Number.isInteger(n) || n < 7 || n > 90) {
+      return res.status(400).json({ error: "days must be an integer between 7 and 90" });
+    }
+    days = n;
+  }
+
+  // Window: start of the UTC day `days - 1` days before today, through now.
+  const now = new Date();
+  const startUtc = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  startUtc.setUTCDate(startUtc.getUTCDate() - (days - 1));
+
+  const [bookings, paidTx] = await Promise.all([
+    prisma.booking.findMany({
+      where: { createdAt: { gte: startUtc } },
+      select: { createdAt: true, status: true },
+    }),
+    prisma.transaction.findMany({
+      where: { status: "PAID", createdAt: { gte: startUtc } },
+      select: { createdAt: true, amountPaise: true },
+    }),
+  ]);
+
+  const buckets = new Map<string, { date: string; bookings: number; completed: number; cancelled: number; revenuePaise: number }>();
+  for (let i = 0; i < days; i++) {
+    const d = new Date(startUtc);
+    d.setUTCDate(d.getUTCDate() + i);
+    const key = d.toISOString().slice(0, 10);
+    buckets.set(key, { date: key, bookings: 0, completed: 0, cancelled: 0, revenuePaise: 0 });
+  }
+
+  for (const b of bookings) {
+    const row = buckets.get(b.createdAt.toISOString().slice(0, 10));
+    if (!row) continue;
+    row.bookings += 1;
+    if (b.status === "COMPLETED") row.completed += 1;
+    else if (b.status === "CANCELLED") row.cancelled += 1;
+  }
+  for (const t of paidTx) {
+    const row = buckets.get(t.createdAt.toISOString().slice(0, 10));
+    if (!row) continue;
+    row.revenuePaise += t.amountPaise;
+  }
+
+  res.json([...buckets.values()]);
+});
+
 // ─── Customers ────────────────────────────────────────────────────────────────────
 
 // GET /admin/users?q=&page=&pageSize= — customer list; `q` matches phone or name.

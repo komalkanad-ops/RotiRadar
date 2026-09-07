@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
 import { useApi, fmtDate } from "../lib/useApi";
 import type { User } from "../lib/types";
-import { PageHeader, Table, Loading, ErrorNote } from "../components/ui";
+import { PageHeader, Table, Loading, ErrorNote, Btn, csvDownload } from "../components/ui";
 
 export default function Users() {
   const [params, setParams] = useSearchParams();
@@ -13,6 +13,21 @@ export default function Users() {
   return (
     <>
       <PageHeader title="Customers">
+        <Btn
+          disabled={loading || !data || data.length === 0}
+          onClick={() =>
+            data &&
+            csvDownload("customers.csv", data, [
+              { key: "name", header: "Name", value: (u) => u.name ?? "" },
+              { key: "phone", header: "Phone", value: (u) => u.phone ?? "" },
+              { key: "email", header: "Email", value: (u) => u.email ?? "" },
+              { key: "authProvider", header: "Provider" },
+              { key: "createdAt", header: "Joined", value: (u) => fmtDate(u.createdAt) },
+            ])
+          }
+        >
+          Export CSV
+        </Btn>
         <form
           onSubmit={(e) => {
             e.preventDefault();

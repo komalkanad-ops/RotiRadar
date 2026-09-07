@@ -115,6 +115,28 @@ describe("cooks", () => {
     expect(second.body[0].weekday).toBe(2);
   });
 
+  it("exposes an admin-gated earnings summary for a cook", async () => {
+    const unauth = await request(app).get(`/cooks/${cookId}/earnings`);
+    expect(unauth.status).toBe(401);
+
+    const res = await request(app).get(`/cooks/${cookId}/earnings`).set("Authorization", `Bearer ${adminToken}`);
+    expect(res.status).toBe(200);
+    expect(res.body.cookId).toBe(cookId);
+    expect(typeof res.body.completedJobs).toBe("number");
+    expect(typeof res.body.grossPaise).toBe("number");
+    expect(typeof res.body.commissionPaise).toBe("number");
+    expect(typeof res.body.netPaise).toBe("number");
+    expect(res.body.netPaise).toBe(res.body.grossPaise - res.body.commissionPaise);
+    // A freshly fabricated cook has no completed bookings.
+    expect(res.body.completedJobs).toBe(0);
+    expect(res.body.lastCompletedAt).toBeNull();
+
+    const missing = await request(app)
+      .get("/cooks/does-not-exist/earnings")
+      .set("Authorization", `Bearer ${adminToken}`);
+    expect(missing.status).toBe(404);
+  });
+
   it("blocks a non-admin from the KYC endpoints", async () => {
     const res = await request(app).get("/cooks").set("Authorization", `Bearer ${cookToken}`);
     expect(res.status).toBe(401);

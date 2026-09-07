@@ -14,6 +14,7 @@ import Reports from "./pages/Reports";
 import Disputes from "./pages/Disputes";
 import Config from "./pages/Config";
 import Admins from "./pages/Admins";
+import { ToastHost } from "./components/ui";
 
 function RequireAuth({ children }: { children: ReactNode }) {
   return getToken() ? <>{children}</> : <Navigate to="/login" replace />;
@@ -21,6 +22,8 @@ function RequireAuth({ children }: { children: ReactNode }) {
 
 export default function App() {
   return (
+    <>
+    <ToastHost />
     <Routes>
       <Route path="/login" element={<Login />} />
       <Route
@@ -44,5 +47,6 @@ export default function App() {
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }
