@@ -49,6 +49,39 @@ describe("admin", () => {
     expect(typeof res.body.grossPaidPaise).toBe("number");
   });
 
+  it("returns a stats timeseries and validates the days bound", async () => {
+    const ok = await request(app)
+      .get("/admin/stats/timeseries?days=14")
+      .set("Authorization", `Bearer ${agentToken}`);
+    expect(ok.status).toBe(200);
+    expect(Array.isArray(ok.body)).toBe(true);
+    expect(ok.body).toHaveLength(14);
+    for (const row of ok.body) {
+      expect(row).toMatchObject({
+        date: expect.stringMatching(/^\d{4}-\d{2}-\d{2}$/),
+      });
+      expect(typeof row.bookings).toBe("number");
+      expect(typeof row.completed).toBe("number");
+      expect(typeof row.cancelled).toBe("number");
+      expect(typeof row.revenuePaise).toBe("number");
+    }
+    // oldest first
+    expect(ok.body[0].date < ok.body[ok.body.length - 1].date).toBe(true);
+
+    const defaulted = await request(app)
+      .get("/admin/stats/timeseries")
+      .set("Authorization", `Bearer ${agentToken}`);
+    expect(defaulted.status).toBe(200);
+    expect(defaulted.body).toHaveLength(30);
+
+    expect(
+      (await request(app).get("/admin/stats/timeseries?days=3").set("Authorization", `Bearer ${agentToken}`)).status,
+    ).toBe(400);
+    expect(
+      (await request(app).get("/admin/stats/timeseries?days=200").set("Authorization", `Bearer ${agentToken}`)).status,
+    ).toBe(400);
+  });
+
   it("lists bookings and customers", async () => {
     const b = await request(app).get("/admin/bookings?pageSize=5").set("Authorization", `Bearer ${agentToken}`);
     expect(b.status).toBe(200);

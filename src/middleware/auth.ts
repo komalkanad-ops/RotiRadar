@@ -11,6 +11,7 @@ export interface AuthClaims {
   sub: string;
   role: "CUSTOMER" | "COOK" | "ADMIN";
   adminRole?: string;
+  email?: string;
 }
 
 declare global {

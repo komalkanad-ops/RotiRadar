@@ -173,8 +173,8 @@ authRouter.post("/admin/login", authLimiter, async (req, res) => {
 
   await prisma.adminUser.update({ where: { id: admin.id }, data: { lastLoginAt: new Date() } });
 
-  const token = issueToken({ sub: admin.id, role: "ADMIN", adminRole: admin.role });
-  res.json({ token, role: "ADMIN", adminRole: admin.role });
+  const token = issueToken({ sub: admin.id, role: "ADMIN", adminRole: admin.role, email: admin.email });
+  res.json({ token, role: "ADMIN", adminRole: admin.role, email: admin.email });
 });
 
 // ─── Session ──────────────────────────────────────────────────────────────────────
