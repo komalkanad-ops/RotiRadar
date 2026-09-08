@@ -2,6 +2,12 @@
   RewriteEngine On
   RewriteBase /
   RewriteRule ^index\.html$ - [L]
+
+  # APK downloads: rotiradar.in/download/<app>.apk serves the files that physically live on the
+  # downloads.rotiradar.in subdomain — its docroot survives the web auto-rebuild, public_html
+  # (this build) does not, so we can't ship the ~24 MB binaries here.
+  RewriteRule ^download/(rotiradar-(?:user|cook)\.apk)$ https://downloads.rotiradar.in/$1 [R=302,L,NC]
+
   # Client-side routing: anything that isn't a real file or directory falls through to the SPA
   # shell so a direct hit or refresh on /pricing, /for-cooks etc. doesn't 404.
   RewriteCond %{REQUEST_FILENAME} !-f
