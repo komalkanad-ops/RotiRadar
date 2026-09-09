@@ -10,6 +10,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preload" as="image" href="/hero-cook.jpg" fetchpriority="high" />
     <link
       href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&display=swap"
       rel="stylesheet"
@@ -22,6 +23,8 @@
     />
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="RotiRadar" />
+    <meta property="og:locale" content="en_IN" />
+    <meta property="og:image:alt" content="A RotiRadar home cook making fresh phulka rotis in a home kitchen" />
     <meta property="og:title" content="RotiRadar — Book a Home Cook in Pune" />
     <meta
       property="og:description"
@@ -42,12 +45,26 @@
     <script type="application/ld+json">
       {
         "@context": "https://schema.org",
-        "@type": "Organization",
-        "name": "RotiRadar",
-        "url": "https://rotiradar.in",
-        "description": "On-demand home cooks for fresh rotis, sabzis, and full meals — cooked in your kitchen. In early access in Pune, India.",
-        "email": "support@rotiradar.in",
-        "areaServed": { "@type": "City", "name": "Pune" }
+        "@graph": [
+          {
+            "@type": "Organization",
+            "@id": "https://rotiradar.in/#org",
+            "name": "RotiRadar",
+            "url": "https://rotiradar.in",
+            "logo": "https://rotiradar.in/logo.svg",
+            "description": "On-demand home cooks for fresh rotis, sabzis, and full meals — cooked in your kitchen. In early access in Pune, India.",
+            "email": "support@rotiradar.in",
+            "areaServed": { "@type": "City", "name": "Pune" }
+          },
+          {
+            "@type": "WebSite",
+            "@id": "https://rotiradar.in/#website",
+            "url": "https://rotiradar.in",
+            "name": "RotiRadar",
+            "publisher": { "@id": "https://rotiradar.in/#org" },
+            "inLanguage": "en-IN"
+          }
+        ]
       }
     </script>
   </head>

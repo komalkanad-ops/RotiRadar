@@ -98,11 +98,13 @@ function Footer() {
               <FooterLink to="/#how-it-works">How it works</FooterLink>
               <FooterLink to="/#pricing">Pricing</FooterLink>
               <FooterLink to="/#safety">Safety</FooterLink>
+              <FooterLink to="/#story">Why RotiRadar</FooterLink>
               <FooterLink to="/#get-app">Download the app</FooterLink>
             </div>
             <div className="space-y-2">
               <FooterLink to="/#for-cooks">For cooks</FooterLink>
               <FooterLink to="/#faq">FAQ</FooterLink>
+              <FooterLink to="/#waitlist">Join the waitlist</FooterLink>
               <FooterLink to="/#contact">Contact</FooterLink>
             </div>
             <div className="space-y-2">

@@ -37,6 +37,8 @@ export default function App() {
           <Route path="/faq" element={toHome("faq")} />
           <Route path="/support" element={toHome("contact")} />
           <Route path="/contact" element={toHome("contact")} />
+          <Route path="/about" element={toHome("story")} />
+          <Route path="/waitlist" element={toHome("waitlist")} />
           <Route path="/download" element={toHome("get-app")} />
 
           <Route path="/privacy" element={<Privacy />} />
