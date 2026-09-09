@@ -1,21 +1,26 @@
 import SectionHeading from "../components/SectionHeading";
 
+/**
+ * Only describe what actually ships today. Features still on the roadmap (masked calling, map
+ * tracking, in-app SOS, insurance, periodic re-verification) are labelled as coming — do not
+ * state them as live. See docs/marketing-roadmap.md §1.
+ */
 const MEASURES = [
   {
-    title: "Masked calls",
-    body: "Your number stays private. Every call between you and your cook is routed through RotiRadar — never shared directly.",
+    title: "No numbers exchanged",
+    body: "You and your cook coordinate through in-app chat tied to the booking — personal phone numbers are never shared. Masked calling is coming with our wider launch.",
   },
   {
-    title: "Monitored chats",
-    body: "In-app chat is screened around the clock for unsafe behaviour, so conversations stay respectful and on-topic.",
+    title: "Chats you can escalate",
+    body: "Every booking's chat is linked to your account. If you report a problem, our team can review the conversation and act on it.",
   },
   {
-    title: "Background-verified cooks",
-    body: "Government ID checks, address verification, and in-person kitchen hygiene training before a cook's first booking.",
+    title: "ID-checked cooks",
+    body: "Every cook submits government ID and photos, which we review before their first booking. Address checks and in-person hygiene training are being added as we scale.",
   },
   {
-    title: "Live visit tracking",
-    body: "Follow your cook's arrival on the map and share the live trip status with family — plus an in-app SOS, just in case.",
+    title: "You pay after the meal",
+    body: "Nothing is charged until the visit is done. If a cook cancels or doesn't show, or the work wasn't as booked, our refund policy covers you.",
   },
 ];
 
@@ -26,14 +31,15 @@ export default function Safety() {
         <div>
           <SectionHeading
             eyebrow="Safety first"
-            title={<>Your home. Your rules. Our promise.</>}
-            lede="Inviting someone into your kitchen takes trust. Every RotiRadar visit is wrapped in layers of protection — before, during, and after the cooking."
+            title={<>Your home. Your rules.</>}
+            lede="Inviting someone into your kitchen takes trust. Here's what protects each booking today — and what we're building next."
           />
           <p className="mt-6 flex items-start gap-3 rounded-2xl border border-sage/30 bg-sage/5 px-4 py-3 text-sm text-sage">
             <span aria-hidden className="mt-0.5">
               ⛨
             </span>
-            Every visit is insured, and every cook is re-verified every 6 months.
+            On the roadmap: masked calling, live map tracking, an in-app SOS button, visit
+            insurance, and periodic re-verification of every cook.
           </p>
         </div>
 

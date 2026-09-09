@@ -28,8 +28,8 @@ export default function Terms() {
 
       <h2>Bookings and payment</h2>
       <ul>
-        <li>Prices, platform fee, and taxes are shown before you confirm a booking.</li>
-        <li>Payment is taken through our payment provider at the time of booking.</li>
+        <li>The price and platform fee are shown before you confirm a booking.</li>
+        <li>Payment is handled through our payment provider, after the visit, as described in the app.</li>
         <li>Groceries and a usable kitchen are the customer's responsibility.</li>
         <li>
           Cancellations and refunds follow the{" "}

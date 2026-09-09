@@ -1,10 +1,14 @@
 import type { QA } from "../components/FaqAccordion";
 
-/** The questions shown on the live site, with working answers. */
+/**
+ * Keep every answer to what actually ships today. RotiRadar is in early access in Pune with a
+ * small cook roster — don't imply scale, speed, or safety features that aren't live. See
+ * docs/marketing-roadmap.md §1.
+ */
 export const FAQS: QA[] = [
   {
     q: "How quickly can I get a cook?",
-    a: "In our live cities, most bookings are matched within the hour, and you can also schedule a slot up to a few days ahead. The app shows the earliest available time for your address before you confirm.",
+    a: "In Pune, we confirm a cook for the slot you choose — book for later today or schedule a few days ahead. The app shows the earliest time we can commit to before you confirm. We're in early access, so availability is still limited.",
   },
   {
     q: "Who buys the groceries and ingredients?",
@@ -12,7 +16,7 @@ export const FAQS: QA[] = [
   },
   {
     q: "Is it safe to invite a cook into my home?",
-    a: "Every cook is background-verified (government ID, address check, in-person hygiene training) before their first booking and re-verified every 6 months. Calls are masked, chats are monitored, visits are tracked and insured, and there's an in-app SOS.",
+    a: "Every cook submits government ID and photos, which we review before their first booking. Your chat is tied to the booking and can be reviewed by our team if you report a problem, and you only pay after the meal. Masked calling, live map tracking, an in-app SOS button, and visit insurance are on our roadmap as we grow.",
   },
   {
     q: "What if I need to cancel or reschedule?",
@@ -20,10 +24,10 @@ export const FAQS: QA[] = [
   },
   {
     q: "How do I pay?",
-    a: "In the app, after the visit — UPI, cards, net banking, or wallets. The price, platform fee, and GST are itemised before you confirm. No cash at the door, no subscription.",
+    a: "In the app, after the visit — UPI, cards, or net banking. The price and platform fee are itemised before you confirm. No cash at the door, no subscription.",
   },
   {
     q: "Which cities is RotiRadar available in?",
-    a: "We're live in 5 Indian cities and adding more. Open the app and enter your address to see whether cooks are available near you — if not, you can register interest and we'll let you know when we reach you.",
+    a: "We're in early access in Pune, starting with a few neighbourhoods. Open the app and enter your address to see whether we can cook for you yet — if not, register your interest and we'll let you know when we reach you.",
   },
 ];

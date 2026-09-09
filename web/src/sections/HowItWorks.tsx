@@ -6,16 +6,16 @@ const STEPS = [
     body: "Pick roti-dal-rice, sabzi prep, or a full meal in the app, and choose a slot that suits you.",
   },
   {
-    title: "Match with a verified cook",
-    body: "We pair you with a background-checked, hygiene-trained home cook near you — often within the hour.",
+    title: "We assign a verified cook",
+    body: "We confirm an ID-verified home cook near you for your slot. In early access, availability is limited — the app shows the earliest time we can commit to.",
   },
   {
     title: "They cook in your kitchen",
-    body: "Your cook arrives with an apron and gets to work with your ingredients, your spices, your way.",
+    body: "Your cook arrives and gets to work with your ingredients, your spices, your way.",
   },
   {
     title: "Eat fresh, pay in-app",
-    body: "Pay securely by UPI or card, rate your cook, and rebook your favourites with one tap.",
+    body: "After the meal, pay securely by UPI, card, or net banking, and rate your cook.",
   },
 ];
 

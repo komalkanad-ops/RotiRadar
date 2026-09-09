@@ -6,40 +6,42 @@ export default function Hero() {
       <div className="min-w-0">
         <p className="inline-flex items-center gap-2 rounded-full border border-ink/15 px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
           <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-terracotta" />
-          Now live in 5 Indian cities
+          Now in early access · Pune
         </p>
 
         <h1 className="mt-5 text-hero">
-          Book a cook{" "}
+          A verified home cook,{" "}
           <span className="italic text-terracotta underline decoration-[3px] underline-offset-[6px]">
-            in minutes.
+            in your kitchen.
           </span>
         </h1>
 
         <p className="mt-5 max-w-prose text-lg text-ink-soft">
-          RotiRadar sends a verified home cook to your kitchen — fresh rotis, dal, sabzi, or a full
-          family meal, cooked your way, in your own home. Starting at just ₹199.
+          RotiRadar brings a verified home cook to your kitchen — fresh rotis, dal, sabzi, or a full
+          family meal, cooked your way with your ingredients. From ₹199 a visit, and you pay after
+          the meal.
         </p>
 
         <StoreButtons className="mt-7" />
 
         <dl className="mt-8 flex flex-wrap gap-x-8 gap-y-3 text-sm">
           <div className="flex items-center gap-2">
-            <span aria-hidden className="text-terracotta">
-              ★
+            <span aria-hidden className="text-sage">
+              ✓
             </span>
-            <dt className="font-semibold">4.8</dt>
-            <dd className="text-ink-soft">average rating</dd>
-          </div>
-          <div className="flex items-center gap-2">
-            <dt className="font-semibold">50,000+</dt>
-            <dd className="text-ink-soft">meals cooked</dd>
+            <dd className="text-ink-soft">ID-verified cooks</dd>
           </div>
           <div className="flex items-center gap-2">
             <span aria-hidden className="text-sage">
               ✓
             </span>
-            <dd className="text-ink-soft">Background-verified cooks</dd>
+            <dd className="text-ink-soft">Pay after the meal</dd>
+          </div>
+          <div className="flex items-center gap-2">
+            <span aria-hidden className="text-sage">
+              ✓
+            </span>
+            <dd className="text-ink-soft">Your kitchen, your ingredients</dd>
           </div>
         </dl>
       </div>
@@ -55,14 +57,15 @@ export default function Hero() {
           />
         </div>
 
+        {/* Illustrative product callouts — not live data. */}
         <div className="absolute -left-4 top-8 rounded-2xl border border-ink/10 bg-paper px-4 py-3 shadow-lg">
           <p className="text-sm font-semibold">Cook on the way</p>
-          <p className="text-xs text-ink-soft">Arriving in 22 min</p>
+          <p className="text-xs text-ink-soft">Follow the status in the app</p>
         </div>
 
         <div className="absolute -bottom-5 right-2 rounded-2xl border border-ink/10 bg-paper px-4 py-3 shadow-lg">
-          <p className="text-sm font-semibold">&ldquo;Rotis like mom&rsquo;s&rdquo;</p>
-          <p className="text-xs text-ink-soft">Priya, HSR Layout</p>
+          <p className="text-sm font-semibold">Pay after the meal</p>
+          <p className="text-xs text-ink-soft">UPI · card · net banking</p>
         </div>
       </div>
     </section>

@@ -5,7 +5,7 @@ export default function Privacy() {
     <LegalPage
       title="Privacy Policy"
       path="/privacy"
-      description="What data RotiRadar collects, how masked calls and chat monitoring work, how KYC documents are handled, and your rights."
+      description="What data RotiRadar collects, how in-app chat review and KYC documents are handled, how masked calls will work when introduced, and your rights."
       updated="September 2026"
     >
       <p>
@@ -27,9 +27,9 @@ export default function Privacy() {
         <strong>Bookings:</strong> the meal type, time, address, price, status history, and ratings.
       </p>
       <p>
-        <strong>Communications:</strong> in-app chat messages tied to a booking, and metadata for
-        masked calls (the parties, time, and duration — not audio, unless call recording is later
-        introduced with separate, explicit consent).
+        <strong>Communications:</strong> in-app chat messages tied to a booking. When masked calling
+        is introduced, we will also store call metadata (the parties, time, and duration — not
+        audio, unless call recording is later introduced with separate, explicit consent).
       </p>
       <p>
         <strong>Payments:</strong> processed by our payment provider. We store a transaction record
@@ -40,12 +40,12 @@ export default function Privacy() {
         a booking, and diagnostic logs.
       </p>
 
-      <h2>Chat and call monitoring</h2>
+      <h2>Chat review</h2>
       <p>
-        To keep customers and cooks safe, our safety team can review the in-app chat and masked-call
-        metadata for a booking — routinely for abuse detection, and in detail when a report is filed.
-        By using RotiRadar you acknowledge this. We keep records of reports, what we found, and what
-        action we took.
+        To keep customers and cooks safe, our safety team can review the in-app chat for a booking
+        (and masked-call metadata once masked calling is introduced) — for abuse detection and when
+        a report is filed. By using RotiRadar you acknowledge this. We keep records of reports, what
+        we found, and what action we took.
       </p>
 
       <h2>How we use it</h2>

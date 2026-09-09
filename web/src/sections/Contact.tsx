@@ -1,10 +1,21 @@
 import SectionHeading from "../components/SectionHeading";
 
-// Placeholder contact details until the real support desk is live.
+// TODO: create the support@ / hello@ mailboxes on Hostinger mail and add a real support phone
+// number once the desk is staffed. No fake phone / street address until then.
 const CARDS = [
-  { label: "Email us", value: "support@rotiradar.in", href: "mailto:support@rotiradar.in", note: "We reply within a day" },
-  { label: "Call support", value: "999-ROTI-RADAR", href: "tel:999-ROTI-RADAR", note: "9 AM – 9 PM, every day" },
-  { label: "Visit us", value: "HSR Layout, Bengaluru", note: "27th Main, Sector 2" },
+  {
+    label: "Email us",
+    value: "support@rotiradar.in",
+    href: "mailto:support@rotiradar.in",
+    note: "Bookings & support — we reply within a day",
+  },
+  {
+    label: "Partnerships & press",
+    value: "hello@rotiradar.in",
+    href: "mailto:hello@rotiradar.in",
+    note: "Cooks, societies, and media enquiries",
+  },
+  { label: "In the app", value: "24×7 in-app support", note: "On every live booking" },
 ];
 
 export default function Contact() {
@@ -13,7 +24,7 @@ export default function Contact() {
       <SectionHeading
         eyebrow="Contact"
         title="Talk to a human"
-        lede="Questions about bookings, partnerships, or press? Reach out — or download the app for 24×7 in-app support on live bookings."
+        lede="Questions about bookings, partnerships, or press? Reach out — or download the app for in-app support on live bookings."
       />
 
       <div className="mt-12 grid gap-6 sm:grid-cols-3">
@@ -33,6 +44,8 @@ export default function Contact() {
           </div>
         ))}
       </div>
+
+      <p className="mt-6 text-xs text-ink-soft">Based in Pune, India.</p>
     </section>
   );
 }

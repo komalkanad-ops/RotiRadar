@@ -87,10 +87,10 @@ function Footer() {
       <div className="mx-auto max-w-6xl px-6 py-16">
         <div className="grid gap-10 lg:grid-cols-[1.3fr_1fr]">
           <div>
-            <h2 className="text-display text-paper">Dinner is 60 minutes away.</h2>
+            <h2 className="text-display text-paper">Ghar ka khana, without lifting a finger.</h2>
             <p className="mt-3 max-w-prose text-paper/70">
-              Download RotiRadar and book your first cook today. Fresh, home-cooked food — without
-              lifting a finger.
+              Download RotiRadar and book your first cook in Pune. Fresh, home-cooked food in your
+              own kitchen.
             </p>
           </div>
           <div className="flex flex-wrap gap-x-12 gap-y-2 text-sm lg:justify-end">
@@ -115,8 +115,9 @@ function Footer() {
         </div>
 
         <div className="mt-12 flex flex-col justify-between gap-3 border-t border-paper/15 pt-6 text-xs text-paper/60 sm:flex-row">
-          <span>© {new Date().getFullYear()} RotiRadar Technologies Pvt. Ltd. All rights reserved.</span>
-          <span>Made with love in Bengaluru</span>
+          {/* TODO: restore "RotiRadar Technologies Pvt. Ltd." + CIN once incorporation completes. */}
+          <span>© {new Date().getFullYear()} RotiRadar. All rights reserved.</span>
+          <span>Made with care in Pune</span>
         </div>
       </div>
     </footer>

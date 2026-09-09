@@ -25,8 +25,8 @@ export default function Home() {
   return (
     <>
       <Seo
-        title="RotiRadar — Book a Home Cook in Minutes | Fresh Rotis from ₹199"
-        description="RotiRadar sends a verified home cook to your kitchen — fresh rotis, dal, sabzi, or a full family meal, cooked your way, from ₹199 a visit. Now live in 5 Indian cities."
+        title="RotiRadar — Book a Home Cook in Pune | Fresh Rotis from ₹199"
+        description="RotiRadar brings a verified home cook to your kitchen — fresh rotis, dal, sabzi, or a full family meal, cooked your way with your ingredients. From ₹199 a visit, pay after the meal. Now in early access in Pune."
         path="/"
         jsonLd={jsonLd}
       />

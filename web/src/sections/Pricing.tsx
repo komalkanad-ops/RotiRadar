@@ -14,7 +14,8 @@ export default function Pricing() {
             />
             <p className="mt-4 max-w-prose text-sm text-ink-soft">
               Groceries aren't included — your cook uses your kitchen and your ingredients. The
-              platform fee and GST are itemised before you pay.
+              price and platform fee are itemised before you pay, and you pay after the meal.
+              {/* TODO: add "and GST" once GST registration is active. */}
             </p>
           </div>
           <div className="overflow-hidden rounded-3xl border border-ink/10 shadow-[0_10px_30px_-14px_rgba(42,27,19,0.3)] lg:w-72">

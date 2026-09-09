@@ -23,7 +23,8 @@ export default function RefundPolicy() {
       <h2>Cancelling inside the cutoff window</h2>
       <p>
         If you cancel within the cutoff window, a late-cancellation fee applies — this covers the
-        cook's committed time and travel. The rest of your payment is refunded.
+        cook's committed time and travel, and is the only amount charged. Anything paid beyond it is
+        refunded.
       </p>
 
       <h2>If the cook cancels or doesn't arrive</h2>
