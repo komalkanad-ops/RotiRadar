@@ -24,8 +24,9 @@ export default function Story() {
           <p>
             RotiRadar is the middle option, done properly: book a verified home cook for a visit,
             pay a fair itemised price in the app, and eat food cooked in your own kitchen with your
-            own ingredients. On the other side, the cook gets a real profile, real ratings, set
-            rates they control, and — as we grow — insurance and steady payouts.
+            own ingredients. On the other side, the cook gets a real profile, real ratings, and set
+            rates they control — and we're working towards insurance and steady weekly payouts as
+            we grow.
           </p>
           <p>
             We're a small team in Pune, cooking for our first neighbourhoods now. If that's

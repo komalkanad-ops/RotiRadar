@@ -12,7 +12,7 @@ import SectionHeading from "../components/SectionHeading";
 const ENDPOINT = import.meta.env.VITE_WAITLIST_ENDPOINT;
 const FALLBACK_EMAIL = "hello@rotiradar.in";
 
-type State = "idle" | "sending" | "done" | "error";
+type State = "idle" | "sending" | "done" | "mailto" | "error";
 
 export default function Waitlist() {
   const [state, setState] = useState<State>("idle");
@@ -26,7 +26,9 @@ export default function Waitlist() {
       const subject = `Waitlist: ${data.area || "new area"}`;
       const body = `Name: ${data.name}\nEmail: ${data.email}\nPhone: ${data.phone || "—"}\nArea / city: ${data.area}`;
       window.location.href = `mailto:${FALLBACK_EMAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-      setState("done");
+      // We can't confirm the mail client actually opened — tell the user what to do next
+      // rather than claiming they're on the list.
+      setState("mailto");
       return;
     }
 
@@ -56,6 +58,15 @@ export default function Waitlist() {
         {state === "done" ? (
           <p className="mt-8 rounded-2xl border border-sage/30 bg-sage/5 px-4 py-4 text-sm text-sage">
             Thanks — you're on the list. We'll be in touch when RotiRadar reaches your area.
+          </p>
+        ) : state === "mailto" ? (
+          <p className="mt-8 rounded-2xl border border-ink/15 bg-cream-deep px-4 py-4 text-sm text-ink-soft">
+            We've opened a draft email with your details — just hit send and you're on the list. If
+            nothing opened, email us at{" "}
+            <a href={`mailto:${FALLBACK_EMAIL}`} className="font-semibold text-terracotta underline">
+              {FALLBACK_EMAIL}
+            </a>{" "}
+            with your area.
           </p>
         ) : (
           <form onSubmit={onSubmit} className="mt-8 grid gap-4">

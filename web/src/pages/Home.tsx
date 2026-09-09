@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import Seo from "../lib/seo";
 import { FAQS } from "../lib/faqs";
 import { TIERS } from "../lib/pricing";
@@ -15,7 +16,7 @@ import Waitlist from "../sections/Waitlist";
 import Contact from "../sections/Contact";
 
 export default function Home() {
-  const jsonLd = {
+  const jsonLd = useMemo(() => ({
     "@context": "https://schema.org",
     "@graph": [
       {
@@ -40,7 +41,7 @@ export default function Home() {
         })),
       },
     ],
-  };
+  }), []);
 
   return (
     <>
